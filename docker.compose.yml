@@ -1,0 +1,21 @@
+#docker run -d --name nest-clean postgres -e POSTGRES_PASSWORD=mypassword -p 5432:5432 postgres 
+
+# CONFIG for Docker Compose to run a PostgreSQL database for a NestJS application
+
+version: "3.8"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: nest-clean-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: nest_clean_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,8 +1,10 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { RegisterDto, LoginDto } from "./dtos/auth";
+import { RegisterDto, LoginDto, PayloadSocialLogin } from "./dtos/auth";
 import { PrismaService } from "@/prisma/prisma.service";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
+import { User } from "generated/prisma";
+import { decodeJwtPayload } from "./utils/utils.auth";
 
 @Injectable()
 export class AuthService {
@@ -25,8 +27,6 @@ export class AuthService {
       data: {
         ...body,
         password: hashedPassword,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
     });
 
@@ -77,6 +77,71 @@ export class AuthService {
         },
         token,
       },
+      status: "success",
+    };
+  }
+
+  async appleLogin(token: string, name?: string) {
+    const payload = decodeJwtPayload<PayloadSocialLogin>(token);
+
+    const { sub, email } = payload;
+
+    let user = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      user = await this.prismaService.user.create({
+        data: {
+          email,
+          name: name || "Apple User",
+          password: bcrypt.hashSync(sub, 10),
+        },
+      });
+    }
+
+    const getToken = this.jwtService.sign({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+
+    return {
+      message: "User logged in successfully",
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          role: user.role,
+        },
+        token: getToken,
+      },
+      status: "success",
+    };
+  }
+  async googleLogin(token: string, name: string) {
+    // extrair sub e email do token JWT
+    const payload = await this.jwtService.decode(token);
+    console.log("Google login payload:", payload, name);
+    if (!payload) {
+      throw new UnauthorizedException({
+        message: "Invalid token",
+        status: "error",
+      });
+    }
+  }
+  async logout(user: User) {
+    await new Promise((resolve) => {
+      console.log(`User ${user.email} logged out`);
+      setTimeout(resolve, 1000);
+    });
+    return {
+      message: "User logged out successfully",
       status: "success",
     };
   }

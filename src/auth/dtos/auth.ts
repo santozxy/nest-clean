@@ -8,6 +8,18 @@ export interface LoginDto {
   password: string;
 }
 
+export interface SocialLoginDto {
+  token: string;
+}
+
+export interface PayloadSocialLogin {
+  sub: string;
+  email: string;
+  name: string;
+  iat: number;
+  exp: number;
+}
+
 export interface AuthResponse {
   accessToken: string;
   user: User;
