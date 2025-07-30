@@ -10,6 +10,7 @@ export interface LoginDto {
 
 export interface SocialLoginDto {
   token: string;
+  name: string;
 }
 
 export interface PayloadSocialLogin {

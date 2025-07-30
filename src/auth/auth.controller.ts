@@ -6,7 +6,7 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
-import { LoginDto, RegisterDto } from "./dtos/auth";
+import { LoginDto, RegisterDto, SocialLoginDto } from "./dtos/auth";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "./auth.guard";
 import { User } from "generated/prisma";
@@ -26,13 +26,13 @@ export class AuthController {
   }
 
   @Post("login/apple")
-  async loginWithApple(@Body() body: { token: string; name: string }) {
-    return this.authService.appleLogin(body.token, body.name);
+  async loginWithApple(@Body() body: SocialLoginDto) {
+    return this.authService.appleLogin(body);
   }
 
   @Post("login/google")
-  async loginWithGoogle(@Body() body: { token: string; name: string }) {
-    return this.authService.googleLogin(body.token, body.name);
+  async loginWithGoogle(@Body() body: SocialLoginDto) {
+    return this.authService.googleLogin(body);
   }
 
   @Post("logout")

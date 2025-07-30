@@ -1,5 +1,10 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { RegisterDto, LoginDto, PayloadSocialLogin } from "./dtos/auth";
+import {
+  RegisterDto,
+  LoginDto,
+  PayloadSocialLogin,
+  SocialLoginDto,
+} from "./dtos/auth";
 import { PrismaService } from "@/prisma/prisma.service";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
@@ -81,7 +86,8 @@ export class AuthService {
     };
   }
 
-  async appleLogin(token: string, name?: string) {
+  async appleLogin(body: SocialLoginDto) {
+    const { name, token } = body;
     const payload = decodeJwtPayload<PayloadSocialLogin>(token);
 
     const { sub, email } = payload;
@@ -124,7 +130,8 @@ export class AuthService {
       status: "success",
     };
   }
-  async googleLogin(token: string, name: string) {
+  async googleLogin(body: SocialLoginDto) {
+    const { token, name } = body;
     // extrair sub e email do token JWT
     const payload = await this.jwtService.decode(token);
     console.log("Google login payload:", payload, name);
